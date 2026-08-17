@@ -48,6 +48,15 @@ def latest(device_id):
     # TODO M1:
     # Läs senaste mätningen från PostgreSQL med get_latest_measurement(...).
     # Returnera 404 om sensorn eller en mätning saknas.
+    if not device_exists(device_id):
+        return jsonify({"error": f"Device {device_id} not found"}), 404
+
+    measurement = get_latest_measurement(device_id)
+    if measurement is None:
+        return jsonify({"error": f"No measurements found for device {device_id}"}), 404
+
+    return jsonify(measurement), 200
+
     #
     # TODO M2:
     # Utöka M1-lösningen med cache-aside:
