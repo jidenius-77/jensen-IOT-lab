@@ -117,7 +117,7 @@ def insert_measurement(data):
             cur.execute(
                 query,
                 (
-                    data.get("device_id"),
+                    data.get("deviceId"),
                     data.get("temperature"),
                     data.get("humidity"),
                     data.get("battery"),
