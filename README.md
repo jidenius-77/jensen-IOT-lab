@@ -122,6 +122,16 @@ docker compose down -v
 
 Fortsätt nu till [docs/lab-guide.md](docs/lab-guide.md) och genomför milstolparna i ordning.
 
+## SQL-frågor
+
+SQL-frågorna för Milstolpe 1 finns i
+[docs/sql-queries.sql](docs/sql-queries.sql).
+
+Frågorna visar:
+- totalt antal mätningar med COUNT
+- medeltemperatur med AVG
+- mätningar från de senaste 24 timmarna
+
 ## Om starten misslyckas
 
 - Kontrollera att Docker Desktop/Docker Engine körs med `docker info`.
