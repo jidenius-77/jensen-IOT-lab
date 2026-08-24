@@ -48,15 +48,12 @@ def latest(device_id):
     # TODO M1:
     # Läs senaste mätningen från PostgreSQL med get_latest_measurement(...).
     # Returnera 404 om sensorn eller en mätning saknas.
-    if not device_exists(device_id):
-        return jsonify({"error": f"Device {device_id} not found"}), 404
-
-    measurement = get_latest_measurement(device_id)
-
-    if measurement is None:
-        return jsonify({"error": f"No measurements found for device {device_id}"}), 404
-
-    return jsonify(measurement), 200
+    #if not device_exists(device_id):
+    #    return jsonify({"error": f"Device {device_id} not found"}), 404
+    # measurement = get_latest_measurement(device_id)
+    # if measurement is None:
+    #   return jsonify({"error": f"No measurements found for device {device_id}"}), 404
+    # return jsonify(measurement), 200
 
     #
     # TODO M2:
@@ -69,6 +66,23 @@ def latest(device_id):
     #    "message": "TODO: implementera latest measurement",
     #    "deviceId": device_id
     # }), 501#
+
+    cached_measurement = get_latest_from_cache(device_id)
+
+    if cached_measurement is not None:
+        return jsonify(cached_measurement), 200
+
+    if not device_exists(device_id):
+        return jsonify({"error": f"Device {device_id} not found"}), 404
+
+    measurement = get_latest_measurement(device_id)
+
+    if measurement is None:
+        return jsonify({"error": f"No measurements found for device {device_id}"}), 404
+
+    set_latest_in_cache(device_id, measurement)
+
+    return jsonify(measurement), 200
 
 
 @app.get("/devices/<device_id>/measurements")
@@ -116,6 +130,9 @@ def create_measurement():
     #
     # Under starter-fasen returneras 202 så att simulatorn kan köras
     # även innan studenten implementerat persistensen.
+    
+    set_latest_in_cache(device_id, saved_measurement)
+
     print(f"VALID measurement received: {data}")
     return jsonify({"status": "created", "measurement": saved_measurement}), 201
 
