@@ -122,16 +122,6 @@ docker compose down -v
 
 Fortsätt nu till [docs/lab-guide.md](docs/lab-guide.md) och genomför milstolparna i ordning.
 
-## SQL-frågor
-
-SQL-frågorna för Milstolpe 1 finns i
-[docs/sql-queries.sql](docs/sql-queries.sql).
-
-Frågorna visar:
-- totalt antal mätningar med COUNT
-- medeltemperatur med AVG
-- mätningar från de senaste 24 timmarna
-
 ## Om starten misslyckas
 
 - Kontrollera att Docker Desktop/Docker Engine körs med `docker info`.
@@ -139,3 +129,144 @@ Frågorna visar:
 - Om port `5001` används av ett annat program: stoppa programmet eller starta med en annan port. PowerShell: `$env:API_PORT=5002; docker compose up --build`. macOS/Linux: `API_PORT=5002 docker compose up --build`.
 - Visa status med `docker compose ps` och loggar med `docker compose logs api db redis simulator`.
 - Om en kodändring inte syns, kontrollera att du har kört `docker compose up --build -d` efter ändringen.
+
+
+
+# Slutrapport – genomförda milstolpar
+
+## Sammanfattning
+
+Projektet har utvecklats från starterkod till en fungerande IoT-plattform med ett Flask-baserat REST API, PostgreSQL, Redis, Docker Compose, CI och Kubernetes.
+
+## Milstolpe 1 – REST API och PostgreSQL
+
+De obligatoriska REST-endpoints har implementerats för att ta emot, validera, lagra och hämta sensordata.
+
+Implementationen omfattar:
+
+* validering av inkommande mätningar
+* kontroll av att sensorn finns
+* lagring av mätningar i PostgreSQL
+* hämtning av de senaste mätningarna
+* hämtning av historik per sensor
+* relevanta HTTP-statuskoder
+
+Giltiga mätningar returnerar **HTTP 201** och ogiltiga mätningar eller okända sensorer returnerar **HTTP 400**.
+
+## Milstolpe 2 – Docker och Redis-cache
+
+PostgreSQL används som beständig lagring och data finns kvar efter att Docker-containrarna stoppas och startas igen.
+
+Redis används som cache för den senaste mätningen per sensor.
+
+Vid anrop till:
+
+```text
+GET /devices/{id}/latest
+```
+
+läser API:t först från Redis. Vid cache miss hämtas den senaste mätningen från PostgreSQL och sparas därefter i Redis.
+
+När en ny mätning sparas uppdateras även motsvarande cachepost i Redis.
+
+PostgreSQL är fortfarande den beständiga källan, vilket innebär att data kan återhämtas även om Redis töms.
+
+## Milstolpe 3 – CI och Kubernetes
+
+En GitHub Actions-workflow har konfigurerats för att köra projektets tester och bygga API:ts Docker-image.
+
+Kubernetes-delen har genomförts i Minikube. API:t har distribuerats med Kubernetes Deployment och Service.
+
+Följande har verifierats:
+
+* tre repliker av API:t
+* self-healing genom att en Pod raderades och ersattes automatiskt
+* scaling från tre till fem repliker och tillbaka till tre
+
+## Milstolpe 4 – Dokumentation och reflektion
+
+Projektets dokumentation har färdigställts i samband med inlämningen.
+
+Följande dokument ingår:
+
+* [Arkitekturdokumentation](docs/architecture.md)
+* [Reflektionsdokument](docs/reflection.md)
+* [SQL-frågor](docs/sql-queries.sql)
+
+## Verifiering och tester
+
+Projektet byggs och startas med:
+
+```bash
+docker compose up --build -d
+```
+
+Tjänsternas status kan kontrolleras med:
+
+```bash
+docker compose ps
+```
+
+Automatiserade tester körs med:
+
+```bash
+docker compose exec api python -m pytest -q
+```
+
+Simulatorn används för att verifiera att giltiga mätningar returnerar **201** och att avsiktligt felaktiga mätningar returnerar **400**.
+
+## SQL-frågor
+
+De tre obligatoriska SQL-frågorna finns i [docs/sql-queries.sql](docs/sql-queries.sql).
+
+Frågorna omfattar:
+
+1. Totalt antal mätningar med `COUNT`
+2. Medeltemperatur med `AVG`
+3. Mätningar från de senaste 24 timmarna
+
+## PostgreSQL och Redis
+
+PostgreSQL används för permanent lagring av sensordata.
+
+Redis används som cache för den senaste mätningen per sensor.
+
+Vid en cache miss hämtas informationen från PostgreSQL och läggs därefter tillbaka i Redis. Detta innebär att Redis kan tömmas utan att den underliggande sensordatan försvinner.
+
+## Kubernetes
+
+API:t har distribuerats i Minikube med Kubernetes Deployment och Service.
+
+Self-healing verifierades genom att en Pod raderades och ersattes automatiskt av Kubernetes.
+
+Scaling verifierades genom att antalet repliker ändrades från tre till fem och därefter tillbaka till tre.
+
+## CI
+
+Projektet innehåller en GitHub Actions-workflow som kör testerna och bygger API:ts Docker-image.
+
+Den senaste CI-körningen har verifierats som grön.
+
+## Dokumentation
+
+Projektets dokumentation finns i:
+
+* [docs/architecture.md](docs/architecture.md)
+* [docs/reflection.md](docs/reflection.md)
+* [docs/sql-queries.sql](docs/sql-queries.sql)
+
+## Slutlig verifiering
+
+Följande delar har verifierats innan inlämning:
+
+* REST API fungerar
+* PostgreSQL lagrar mätningar
+* Redis-cache fungerar
+* Docker Compose-miljön fungerar
+* SQL-frågorna besvarade
+* automatiserade tester är genomförda
+* CI-körningen är grön
+* Kubernetes self-healing är genomförd
+* Kubernetes scaling är genomförd
+* dokumentationen är färdig
+* Reflektion-frågorna besvarade
