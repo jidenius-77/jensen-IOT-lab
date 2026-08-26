@@ -1,40 +1,21 @@
-# Arkitekturdiagram – obligatorisk leverabel
+# Arkitekturbeskrivning & Systemöversikt
 
-Skapa ett enkelt diagram över **din färdiga lösning**. Det ska visa komponenterna och hur de kommunicerar; du behöver inte använda UML eller någon annan avancerad standard.
+Detta dokument beskriver arkitekturen för **Jensen IoT Platform**, inklusive komponenter, dataflöden, lokal körmiljö med Docker Compose, CI-pipeline samt Kubernetes.
 
-Diagrammet ska minst visa:
+## Arkitekturdiagram
 
-- en klient eller användare som anropar lösningen
-- de tre simulerade IoT-sensorerna
-- REST API:t
-- PostgreSQL för beständig historik
-- Redis för cache av senaste mätning
-- Docker Compose som lokal körmiljö
-- CI-pipelinen
-- Kubernetes-demon med Deployment, Pod-repliker och Service
+![Arkitekturdiagram](Arkitektur-diagram.png)
 
-Använd namngivna pilar som visar viktiga anrop och dataflöden, exempelvis `HTTP POST /measurements`, `SQL` och `cache read/write`. Det ska gå att se vilket flöde som är skrivintensivt (**write-heavy**), vad som cacheas och vad som måste vara persistent.
+## Arkitekturval
 
-Ett enkelt exempel på detaljnivå:
+De tre simulerade IoT-sensorerna skickar mätdata till REST API:t via `POST /measurements`. Detta är systemets write-heavy-flöde.
 
-```text
-[3 sensorer] -- HTTP POST /measurements --> [REST API]
-                                              |  \
-                               SQL, historik  |   \ senaste värde
-                                              v    v
-                                        [PostgreSQL] [Redis cache]
+REST API:t validerar inkommande data och lagrar mätningarna i PostgreSQL. PostgreSQL används för beständig historik och behåller därför mätdata även när containrarna startas om.
 
-[GitHub push] --> [CI: tester + image build]
-[Användare] --> [Kubernetes Service] --> [Deployment: 3 Pod-repliker]
-```
+Redis används som cache för den senaste mätningen per sensor. API:t kan läsa och skriva den senaste mätningen i Redis, medan PostgreSQL fungerar som den beständiga datakällan.
 
-Exemplet är vägledning, inte en mall som måste kopieras. Du kan göra ett sammanhängande diagram eller två tydligt märkta vyer (lokal Docker Compose-miljö och Kubernetes-demo). Gör inte diagrammet mer detaljerat än vad som behövs för att förklara lösningen.
+Den lokala miljön körs med Docker Compose och består av simulator, REST API, PostgreSQL och Redis.
 
-## Så lämnas det i repositoryt
+CI-pipelinen i GitHub Actions kör pytest-tester och bygger API:ts Docker-image vid push eller pull request.
 
-1. Skapa diagrammet i valfritt verktyg, exempelvis diagrams.net, Excalidraw, Visio, PowerPoint eller Figma.
-2. Exportera det som PNG eller PDF till `docs/`.
-3. Länka eller bädda in filen här.
-4. Ersätt denna instruktion med en kort beskrivning av diagrammet och dina viktigaste arkitekturval.
-
-Kontrollera före inlämning att text och pilar går att läsa direkt från GitHub och att diagrammet stämmer med den kod du faktiskt lämnar in.
+Kubernetes-demon körs i Minikube. En NodePort-Service på port `30080` leder trafik till en Deployment med tre Pod-repliker. Deploymenten har även testats för self-healing och scaling.
