@@ -73,9 +73,10 @@ docker compose ps
 - <http://localhost:5001> – enkel startsida
 - <http://localhost:5001/health> – ska visa `"status": "ok"`
 - <http://localhost:5001/devices> – ska visa tre sensorer
-- <http://localhost:5001/measurements> – ska visa en tom lista `[]`
+- <http://localhost:5001/measurements> – ska visa en tom lista `[]`, ***Men nu efter kodfixning vidar sparade mätningar.***
 
 Den tomma listan är förväntad. Simulatorns giltiga data tas emot men sparas inte förrän du har implementerat lagringen i milstolpe 1.
+***Men eftersom milstolpe 1 nu är färdig är det inte längre en tom lista utan tidigare mätningar.***
 
 ### 5. Följ simulatorn
 
@@ -84,6 +85,7 @@ docker compose logs -f simulator
 ```
 
 Från början returnerar API:t status `202` för giltiga mätningar. `sensor-003` skickar ibland avsiktligt felaktig data och ska då få `400`. Det är förväntat. Avsluta den löpande loggvisningen med `Ctrl+C`; tjänsterna fortsätter att köras i bakgrunden.
+***Men eftersom milstolpe 1 nu är färdig retunerar `201` för giltiga mätningar.***
 
 ### 6. Ändra och testa koden
 
@@ -169,7 +171,7 @@ läser API:t först från Redis. Vid cache miss hämtas den senaste mätningen f
 
 När en ny mätning sparas uppdateras även motsvarande cachepost i Redis.
 
-PostgreSQL är fortfarande den beständiga källan, vilket innebär att data kan återhämtas även om Redis töms.
+PostgreSQL är den beständiga datakällan. Om Redis töms kan den senaste mätningen hämtas från PostgreSQL och därefter cachelagras i Redis igen.
 
 ## Milstolpe 3 – CI och Kubernetes
 
@@ -255,6 +257,12 @@ Projektets dokumentation finns i:
 * [docs/reflection.md](docs/reflection.md)
 * [docs/sql-queries.sql](docs/sql-queries.sql)
 
+## Kända begränsningar
+
+Fördjupningsfunktionen `/statistics` är inte implementerad eftersom den var frivillig och tidsbegräningar fanns.
+
+Kubernetes-demon omfattar endast REST API:t. PostgreSQL, Redis och simulatorn körs lokalt med Docker Compose enligt laborationens avgränsning.
+
 ## Slutlig verifiering
 
 Följande delar har verifierats innan inlämning:
@@ -263,10 +271,10 @@ Följande delar har verifierats innan inlämning:
 * PostgreSQL lagrar mätningar
 * Redis-cache fungerar
 * Docker Compose-miljön fungerar
-* SQL-frågorna besvarade
+* SQL-frågorna är genomförda och dokumenterade
 * automatiserade tester är genomförda
 * CI-körningen är grön
 * Kubernetes self-healing är genomförd
 * Kubernetes scaling är genomförd
 * dokumentationen är färdig
-* Reflektion-frågorna besvarade
+* Reflektionsfrågorna är besvarade
