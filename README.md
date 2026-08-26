@@ -73,7 +73,7 @@ docker compose ps
 - <http://localhost:5001> – enkel startsida
 - <http://localhost:5001/health> – ska visa `"status": "ok"`
 - <http://localhost:5001/devices> – ska visa tre sensorer
-- <http://localhost:5001/measurements> – ska visa en tom lista `[]`, ***Men nu efter kodfixning vidar sparade mätningar.***
+- <http://localhost:5001/measurements> – ska visa en tom lista `[]`, ***Men nu efter implentering visar sparade mätningar.***
 
 Den tomma listan är förväntad. Simulatorns giltiga data tas emot men sparas inte förrän du har implementerat lagringen i milstolpe 1.
 ***Men eftersom milstolpe 1 nu är färdig är det inte längre en tom lista utan tidigare mätningar.***
@@ -134,7 +134,7 @@ Fortsätt nu till [docs/lab-guide.md](docs/lab-guide.md) och genomför milstolpa
 
 
 
-# Slutrapport – genomförda milstolpar
+# Slutrapport – Genomförda milstolpar
 
 ## Sammanfattning
 
@@ -272,9 +272,9 @@ Följande delar har verifierats innan inlämning:
 * Redis-cache fungerar
 * Docker Compose-miljön fungerar
 * SQL-frågorna är genomförda och dokumenterade
-* automatiserade tester är genomförda
+* Automatiserade tester är genomförda
 * CI-körningen är grön
 * Kubernetes self-healing är genomförd
 * Kubernetes scaling är genomförd
-* dokumentationen är färdig
+* Dokumentationen är färdig
 * Reflektionsfrågorna är besvarade
