@@ -52,10 +52,7 @@ def get_measurements():
 
 
 def device_exists(device_id):
-    # TODO M1:
-    # Kontrollera om device_id finns i tabellen devices.
-    # Returnera True eller False.
-
+    
     query = "SELECT 1 FROM devices WHERE device_id = %s;"
     with get_connection() as conn:
         with conn.cursor() as cur:
@@ -67,8 +64,6 @@ def device_exists(device_id):
 
 
 def get_latest_measurement(device_id):
-    # TODO M1:
-    # Implementera senaste mätvärdet för en sensor.
 
     query = """
         SELECT id, device_id, temperature, humidity, battery, created_at
@@ -87,8 +82,6 @@ def get_latest_measurement(device_id):
 
 
 def get_measurements_for_device(device_id):
-    # TODO M1:
-    # Implementera historik för en sensor.
 
     query = """
         SELECT id, device_id, temperature, humidity, battery, created_at
@@ -104,8 +97,6 @@ def get_measurements_for_device(device_id):
 
 
 def insert_measurement(data):
-    # TODO M1:
-    # Spara ett validerat mätvärde i PostgreSQL.
 
     query = """
         INSERT INTO measurements (device_id, temperature, humidity, battery)

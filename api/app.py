@@ -45,28 +45,7 @@ def measurements():
 
 @app.get("/devices/<device_id>/latest")
 def latest(device_id):
-    # TODO M1:
-    # Läs senaste mätningen från PostgreSQL med get_latest_measurement(...).
-    # Returnera 404 om sensorn eller en mätning saknas.
-    # if not device_exists(device_id):
-    #    return jsonify({"error": f"Device {device_id} not found"}), 404
-    # measurement = get_latest_measurement(device_id)
-    # if measurement is None:
-    #   return jsonify({"error": f"No measurements found for device {device_id}"}), 404
-    # return jsonify(measurement), 200
-
-    #
-    # TODO M2:
-    # Utöka M1-lösningen med cache-aside:
-    # 1. Försök läsa från Redis.
-    # 2. Vid cache miss: läs från PostgreSQL.
-    # 3. Spara databasresultatet i Redis.
-    #
-    # return jsonify({
-    #    "message": "TODO: implementera latest measurement",
-    #    "deviceId": device_id
-    # }), 501#
-
+   
     cached_measurement = get_latest_from_cache(device_id)
 
     if cached_measurement is not None:
@@ -87,9 +66,7 @@ def latest(device_id):
 
 @app.get("/devices/<device_id>/measurements")
 def device_history(device_id):
-    # TODO M1:
-    # Hämta sensorhistorik från PostgreSQL.
-    # Känd sensor utan mätningar: 200 och []. Okänd sensor: 404.
+    
     if not device_exists(device_id):
         return jsonify({"error": f"Device {device_id} not found"}), 404
 
@@ -97,12 +74,7 @@ def device_history(device_id):
 
     return jsonify(history), 200
     
-    # return jsonify({
-    #    "message": "TODO: implementera device history",
-    #    "deviceId": device_id
-    # }), 501
-
-
+    
 @app.post("/measurements")
 def create_measurement():
     data = request.get_json(silent=True) or {}
@@ -112,12 +84,6 @@ def create_measurement():
         print(f"INVALID measurement from {data.get('deviceId', 'unknown')}: {errors}")
         return jsonify({"errors": errors}), 400
 
-    # TODO M1:
-    # Kontrollera med device_exists(...) att deviceId tillhör en känd sensor.
-    # Okänd sensor ska ge 400 med ett tydligt JSON-fel.
-    #
-    # Spara till PostgreSQL via insert_measurement(data).
-    #
     device_id = data.get("deviceId")
 
     if not device_exists(device_id):
@@ -125,12 +91,6 @@ def create_measurement():
 
     saved_measurement = insert_measurement(data)
 
-    # TODO M2:
-    # Uppdatera latest-cache för sensorn.
-    #
-    # Under starter-fasen returneras 202 så att simulatorn kan köras
-    # även innan studenten implementerat persistensen.
-    
     set_latest_in_cache(device_id, saved_measurement)
 
     print(f"VALID measurement received: {data}")
